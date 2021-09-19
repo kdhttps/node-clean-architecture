@@ -7,15 +7,8 @@
     "test": "jest",
     "prepare": "husky install"
   },
-  "lint-staged": {
-    "*.js": [
-      "standard"
-    ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+  "standard": {
+    "env": ["jest"]
   },
   "repository": {
     "type": "git",
