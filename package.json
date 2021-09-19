@@ -6,6 +6,16 @@
   "scripts": {
     "test": "npm run test"
   },
+  "lint-staged": {
+    "*.js": [
+      "standard"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kdhttps/node-clean-architecture.git"
@@ -20,6 +30,8 @@
   },
   "homepage": "https://github.com/kdhttps/node-clean-architecture#readme",
   "devDependencies": {
+    "husky": "^7.0.2",
+    "lint-staged": "^11.1.2",
     "standard": "^16.0.3"
   }
 }
