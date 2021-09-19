@@ -1,0 +1,22 @@
+{
+  "name": "node-clean-api",
+  "version": "0.1.0",
+  "description": "Node Clean Architecture Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kdhttps/node-clean-architecture.git"
+  },
+  "keywords": [
+    "cleancode"
+  ],
+  "author": "kdhttps",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kdhttps/node-clean-architecture/issues"
+  },
+  "homepage": "https://github.com/kdhttps/node-clean-architecture#readme"
+}
