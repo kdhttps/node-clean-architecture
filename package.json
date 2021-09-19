@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/kdhttps/node-clean-architecture/issues"
   },
-  "homepage": "https://github.com/kdhttps/node-clean-architecture#readme"
+  "homepage": "https://github.com/kdhttps/node-clean-architecture#readme",
+  "devDependencies": {
+    "standard": "^16.0.3"
+  }
 }
