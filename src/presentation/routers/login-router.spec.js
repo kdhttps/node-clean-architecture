@@ -1,16 +1,10 @@
 const LoginRouter = require('./login-router')
 const MissingParamError = require('../helpers/missing-param.error')
 const Unauthenticated = require('../helpers/unauthenticated.error')
+const ServerError = require('../helpers/server.error')
 
 const makeSut = () => {
-  class AuthUseCaseSpy {
-    auth (email, password) {
-      this.email = email
-      this.password = password
-      return this.accessToken
-    }
-  }
-  const authUseCaseSpy = new AuthUseCaseSpy()
+  const authUseCaseSpy = makeAuthUseCase()
   authUseCaseSpy.accessToken = 'avengers'
   const sut = new LoginRouter(authUseCaseSpy)
 
@@ -20,6 +14,27 @@ const makeSut = () => {
   }
 }
 
+const makeAuthUseCase = () => {
+  class AuthUseCaseSpy {
+    auth (email, password) {
+      this.email = email
+      this.password = password
+      return this.accessToken
+    }
+  }
+
+  return new AuthUseCaseSpy()
+}
+
+const makeAuthUseCaseWithError = () => {
+  class AuthUseCaseSpy {
+    auth () {
+      throw new Error()
+    }
+  }
+
+  return new AuthUseCaseSpy()
+}
 describe('Login Router', () => {
   test('should return 400 if email is not provided', () => {
     const { sut } = makeSut()
@@ -53,12 +68,14 @@ describe('Login Router', () => {
     const { sut } = makeSut()
     const httpResponse = sut.route(null)
     expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
   })
 
   test('should return 500 if httpRequest has no body', () => {
     const { sut } = makeSut()
     const httpResponse = sut.route({})
     expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
   })
 
   test('should call AuthUseCase with correct params', () => {
@@ -128,6 +145,21 @@ describe('Login Router', () => {
     }
 
     const httpResponse = sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
+  })
+
+  test('should return 500 if auth case throws', () => {
+    const authUseCaseSpy = makeAuthUseCaseWithError()
+    const sut = new LoginRouter(authUseCaseSpy)
+    const httpRequest = {
+      body: {
+        email: 'loki@gmail.com',
+        password: 'xxx000'
+      }
+    }
+
+    const httpResponse = sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.statusCode).toBe(500)
   })
 })
