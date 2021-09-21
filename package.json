@@ -4,7 +4,8 @@
   "description": "Node Clean Architecture Project",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watchAll",
+    "test": "jest",
+    "test:unit": "jest --watchAll",
     "prepare": "husky install"
   },
   "standard": {
