@@ -81,6 +81,13 @@ describe('Auth UseCase', () => {
     expect(loadUserByEmailResository.email).toBe(email)
   })
 
+  test('should throw error when no dependency is provided', async () => {
+    const sut = new AuthUseCase()
+    const email = 'captain@gmail.com'
+    const promise = sut.auth(email, 'abc123')
+    expect(promise).rejects.toThrow()
+  })
+
   test('should throw error when no LoadUserByEmailResository is provided', async () => {
     const sut = new AuthUseCase({})
     const email = 'captain@gmail.com'
