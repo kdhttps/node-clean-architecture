@@ -1,7 +1,7 @@
 const { MissingParamError } = require('../../utils/errors')
 
 module.exports = class AuthUseCase {
-  constructor (loadUserByEmailResository, encrypter, tokenGenerator) {
+  constructor ({ loadUserByEmailResository, encrypter, tokenGenerator }) {
     this.loadUserByEmailResository = loadUserByEmailResository
     this.encrypter = encrypter
     this.tokenGenerator = tokenGenerator
