@@ -82,24 +82,49 @@ describe('Auth UseCase', () => {
   })
 
   test('should throw error when no dependency is provided', async () => {
-    const sut = new AuthUseCase()
-    const email = 'captain@gmail.com'
-    const promise = sut.auth(email, 'abc123')
-    expect(promise).rejects.toThrow()
-  })
-
-  test('should throw error when no LoadUserByEmailResository is provided', async () => {
-    const sut = new AuthUseCase({})
-    const email = 'captain@gmail.com'
-    const promise = sut.auth(email, 'abc123')
-    expect(promise).rejects.toThrow()
-  })
-
-  test('should throw error when no LoadUserByEmailResository has no load method', async () => {
-    const sut = new AuthUseCase({ loadUserByEmailResository: {} })
-    const email = 'captain@gmail.com'
-    const promise = sut.auth(email, 'abc123')
-    expect(promise).rejects.toThrow()
+    const loadUserByEmailResository = makeUserByEmailRepository()
+    const encrypter = makeEncrypter()
+    const suts = [
+      new AuthUseCase(),
+      new AuthUseCase({}),
+      new AuthUseCase({ loadUserByEmailResository: {} }),
+      new AuthUseCase({ loadUserByEmailResository: null }),
+      new AuthUseCase({
+        loadUserByEmailResository: null,
+        encrypter: null,
+        tokenGenerator: null
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository: {},
+        encrypter: {},
+        tokenGenerator: {}
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter: {},
+        tokenGenerator: {}
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter: null,
+        tokenGenerator: null
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter,
+        tokenGenerator: {}
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter,
+        tokenGenerator: null
+      })
+    ]
+    for (const sut of suts) {
+      const email = 'captain@gmail.com'
+      const promise = sut.auth(email, 'abc123')
+      expect(promise).rejects.toThrow()
+    }
   })
 
   test('should returns null if an invalid email is provided', async () => {
