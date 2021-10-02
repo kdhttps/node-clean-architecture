@@ -44,6 +44,35 @@ const makeTokenGenerator = () => {
   return tokenGenerator
 }
 
+const makeEncrypterWithError = () => {
+  class EncrypterSpy {
+    async compare (password, hashedPassword) {
+      throw new Error()
+    }
+  }
+  return new EncrypterSpy()
+}
+
+const makeUserByEmailRepositoryWithError = () => {
+  class LoadUserByEmailResositorySpy {
+    async load (email) {
+      throw new Error()
+    }
+  }
+
+  return new LoadUserByEmailResositorySpy()
+}
+
+const makeTokenGeneratorError = () => {
+  class TokenGeneratorSpy {
+    async generate (userId) {
+      throw new Error()
+    }
+  }
+
+  return new TokenGeneratorSpy()
+}
+
 const makeSut = () => {
   const loadUserByEmailResository = makeUserByEmailRepository()
   const encrypter = makeEncrypter()
@@ -79,6 +108,41 @@ describe('Auth UseCase', () => {
     const email = 'captain@gmail.com'
     await sut.auth(email, 'abc123')
     expect(loadUserByEmailResository.email).toBe(email)
+  })
+
+  test('should returns null if an invalid email is provided', async () => {
+    const { sut, loadUserByEmailResository } = makeSut()
+    loadUserByEmailResository.user = null
+    const accessToken = await sut.auth('loki@gmail.com', 'abc123')
+    expect(accessToken).toBeNull()
+  })
+
+  test('should returns null if an invalid password is provided', async () => {
+    const { sut, encrypter } = makeSut()
+    encrypter.isValid = false
+    const accessToken = await sut.auth('captain@gmail.com', 'xyz321')
+    expect(accessToken).toBeNull()
+  })
+
+  test('should call Encrypter with correct value', async () => {
+    const { sut, loadUserByEmailResository, encrypter } = makeSut()
+    const password = 'xyz321'
+    await sut.auth('captain@gmail.com', password)
+    expect(encrypter.password).toBe(password)
+    expect(encrypter.hashedPassword).toBe(loadUserByEmailResository.user.password)
+  })
+
+  test('should call TokenGenerator with correct userId', async () => {
+    const { sut, loadUserByEmailResository, tokenGenerator } = makeSut()
+    await sut.auth('captain@gmail.com', 'password')
+    expect(tokenGenerator.userId).toBe(loadUserByEmailResository.user.userId)
+  })
+
+  test('should return token if correct credentials are provided', async () => {
+    const { sut, tokenGenerator } = makeSut()
+    const accessToken = await sut.auth('captain@gmail.com', 'password')
+    expect(accessToken).toBe(tokenGenerator.accessToken)
+    expect(accessToken).toBeTruthy()
   })
 
   test('should throw error when no dependency is provided', async () => {
@@ -127,38 +191,28 @@ describe('Auth UseCase', () => {
     }
   })
 
-  test('should returns null if an invalid email is provided', async () => {
-    const { sut, loadUserByEmailResository } = makeSut()
-    loadUserByEmailResository.user = null
-    const accessToken = await sut.auth('loki@gmail.com', 'abc123')
-    expect(accessToken).toBeNull()
-  })
+  test('should throw if any dependency throws', async () => {
+    const loadUserByEmailResository = makeUserByEmailRepository()
+    const encrypter = makeEncrypter()
 
-  test('should returns null if an invalid password is provided', async () => {
-    const { sut, encrypter } = makeSut()
-    encrypter.isValid = false
-    const accessToken = await sut.auth('captain@gmail.com', 'xyz321')
-    expect(accessToken).toBeNull()
-  })
-
-  test('should call Encrypter with correct value', async () => {
-    const { sut, loadUserByEmailResository, encrypter } = makeSut()
-    const password = 'xyz321'
-    await sut.auth('captain@gmail.com', password)
-    expect(encrypter.password).toBe(password)
-    expect(encrypter.hashedPassword).toBe(loadUserByEmailResository.user.password)
-  })
-
-  test('should call TokenGenerator with correct userId', async () => {
-    const { sut, loadUserByEmailResository, tokenGenerator } = makeSut()
-    await sut.auth('captain@gmail.com', 'password')
-    expect(tokenGenerator.userId).toBe(loadUserByEmailResository.user.userId)
-  })
-
-  test('should return token if correct credentials are provided', async () => {
-    const { sut, tokenGenerator } = makeSut()
-    const accessToken = await sut.auth('captain@gmail.com', 'password')
-    expect(accessToken).toBe(tokenGenerator.accessToken)
-    expect(accessToken).toBeTruthy()
+    const suts = [
+      new AuthUseCase({
+        loadUserByEmailResository: makeUserByEmailRepositoryWithError()
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter: makeEncrypterWithError()
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter,
+        tokenGenerator: makeTokenGeneratorError()
+      })
+    ]
+    for (const sut of suts) {
+      const email = 'captain@gmail.com'
+      const promise = sut.auth(email, 'abc123')
+      expect(promise).rejects.toThrow()
+    }
   })
 })
