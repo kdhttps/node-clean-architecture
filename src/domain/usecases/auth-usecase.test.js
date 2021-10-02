@@ -174,6 +174,7 @@ describe('Auth UseCase', () => {
   test('should throw error when no dependency is provided', async () => {
     const loadUserByEmailResository = makeUserByEmailRepository()
     const encrypter = makeEncrypter()
+    const tokenGenerator = makeTokenGenerator()
     const suts = [
       new AuthUseCase(),
       new AuthUseCase({}),
@@ -208,6 +209,18 @@ describe('Auth UseCase', () => {
         loadUserByEmailResository,
         encrypter,
         tokenGenerator: null
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter,
+        tokenGenerator,
+        updateAccessTokenRepository: {}
+      }),
+      new AuthUseCase({
+        loadUserByEmailResository,
+        encrypter,
+        tokenGenerator,
+        updateAccessTokenRepository: null
       })
     ]
     for (const sut of suts) {
