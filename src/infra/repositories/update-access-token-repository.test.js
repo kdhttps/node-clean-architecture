@@ -2,6 +2,12 @@ const { MissingParamError } = require('../../utils/errors')
 const MongoHelper = require('../helpers/mongo-helper')
 const UpdateAccessTokenRepository = require('./update-access-token-repository')
 let db
+const user = {
+  _id: 'any_id',
+  email: 'valid@test.com',
+  name: 'test',
+  password: 'hashed_password'
+}
 
 const makeSut = () => {
   const userModel = db.collection('users')
@@ -28,12 +34,7 @@ describe('UpdateAccessTokenRepository Test', () => {
 
   test('should update the user with the given accessToken', async () => {
     const { userModel, sut } = makeSut()
-    const user = {
-      _id: 'any_id',
-      email: 'valid@test.com',
-      name: 'test',
-      password: 'hashed_password'
-    }
+
     await userModel.insertOne(user)
     await sut.update(user._id, 'valid_token')
     const updateUser = await userModel.findOne({ _id: user._id })
@@ -42,12 +43,6 @@ describe('UpdateAccessTokenRepository Test', () => {
 
   test('should throw error if no userModel is provided', async () => {
     const sut = new UpdateAccessTokenRepository()
-    const user = {
-      _id: 'any_id',
-      email: 'valid@test.com',
-      name: 'test',
-      password: 'hashed_password'
-    }
     const promise = sut.update(user._id, 'valid_token')
     expect(promise).rejects.toThrow()
   })
