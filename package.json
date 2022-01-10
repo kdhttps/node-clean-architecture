@@ -5,7 +5,7 @@
   "main": "src/main/index.js",
   "scripts": {
     "start": "node src/main/index.js",
-    "test": "jest",
+    "test": "jest -i",
     "test:unit": "jest --watch -c jest-unit.config.js",
     "test:integration": "jest --watch -c jest-integration.config.js",
     "prepare": "husky install"
