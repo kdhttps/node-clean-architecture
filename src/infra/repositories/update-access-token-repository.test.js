@@ -10,12 +10,7 @@ const user = {
 }
 
 const makeSut = () => {
-  const userModel = db.collection('users')
-  const sut = new UpdateAccessTokenRepository(userModel)
-  return {
-    userModel,
-    sut
-  }
+  return new UpdateAccessTokenRepository()
 }
 
 describe('UpdateAccessTokenRepository Test', () => {
@@ -33,29 +28,17 @@ describe('UpdateAccessTokenRepository Test', () => {
   })
 
   test('should update the user with the given accessToken', async () => {
-    const { userModel, sut } = makeSut()
+    const sut = makeSut()
 
-    await userModel.insertOne(user)
+    await db.collection('users').insertOne(user)
     await sut.update(user._id, 'valid_token')
-    const updateUser = await userModel.findOne({ _id: user._id })
+    const updateUser = await db.collection('users').findOne({ _id: user._id })
     expect(updateUser.accessToken).toBe('valid_token')
   })
 
-  test('should throw error if no userModel is provided', async () => {
-    const sut = new UpdateAccessTokenRepository()
-    const promise = sut.update(user._id, 'valid_token')
-    expect(promise).rejects.toThrow()
-  })
-
-  test('should throw error if no id is provided', async () => {
-    const { sut } = makeSut()
-    const promise = sut.update()
-    expect(promise).rejects.toThrow(new MissingParamError('userId'))
-  })
-
-  test('should throw error if no accessToken is provided', async () => {
-    const { sut } = makeSut()
-    const promise = sut.update('valid_id')
-    expect(promise).rejects.toThrow(new MissingParamError('accessToken'))
+  test('should throw error if no param provided', async () => {
+    const sut = makeSut()
+    expect(sut.update()).rejects.toThrow(new MissingParamError('userId'))
+    expect(sut.update('valid_id')).rejects.toThrow(new MissingParamError('accessToken'))
   })
 })
