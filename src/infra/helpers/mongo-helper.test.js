@@ -21,10 +21,10 @@ describe('Mongo Helper', () => {
     expect(MongoHelper.connection).toBeFalsy()
   })
 
-  test('should connecte after getdb call', async () => {
+  test('should connecte after getCollection call', async () => {
     const sut = await makeSut()
     await sut.close()
-    await sut.getDB()
+    await sut.getCollection('users')
     expect(MongoHelper.db).toBeTruthy()
     expect(MongoHelper.connection).toBeTruthy()
     await sut.close()
