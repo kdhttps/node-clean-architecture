@@ -261,7 +261,7 @@ describe('Login Router', () => {
     expect(emailValidatorSpy.email).toBe(httpRequest.body.email)
   })
 
-  test('should throw if any dependency throws', async () => {
+  test('should throw error when no dependency is provided', async () => {
     const invalid = {}
     const authUseCase = makeAuthUseCase()
     const suts = [
@@ -279,6 +279,31 @@ describe('Login Router', () => {
       }),
       new LoginRouter({
         emailValidator: invalid
+      })
+    ]
+    for (const sut of suts) {
+      const httpRequest = {
+        body: {
+          email: 'loki@gmail.com',
+          password: 'xxx000'
+        }
+      }
+
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+    }
+  })
+
+  test('should throw error if any dependency throws error', async () => {
+    const authUseCase = makeAuthUseCaseWithError()
+
+    const suts = [
+      new LoginRouter({
+        authUseCase
+      }),
+      new LoginRouter({
+        authUseCase,
+        emailValidator: makeEmailValidatorWithError()
       })
     ]
     for (const sut of suts) {
