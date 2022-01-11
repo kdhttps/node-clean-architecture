@@ -5,7 +5,10 @@ const { MissingParamError, InvalidParamError } = require('../../utils/errors')
 const makeSut = () => {
   const authUseCaseSpy = makeAuthUseCase()
   const emailValidatorSpy = makeEmailValidator()
-  const sut = new LoginRouter(authUseCaseSpy, emailValidatorSpy)
+  const sut = new LoginRouter({
+    authUseCase: authUseCaseSpy,
+    emailValidator: emailValidatorSpy
+  })
 
   return {
     sut,
@@ -148,7 +151,7 @@ describe('Login Router', () => {
   })
 
   test('should return 500 if no auth case provided', async () => {
-    const sut = new LoginRouter()
+    const sut = new LoginRouter({})
     const httpRequest = {
       body: {
         email: 'loki@gmail.com',
@@ -161,7 +164,7 @@ describe('Login Router', () => {
   })
 
   test('should return 500 if auth case has no auth method', async () => {
-    const sut = new LoginRouter({})
+    const sut = new LoginRouter({ authUseCase: null })
     const httpRequest = {
       body: {
         email: 'loki@gmail.com',
@@ -256,5 +259,38 @@ describe('Login Router', () => {
 
     await sut.route(httpRequest)
     expect(emailValidatorSpy.email).toBe(httpRequest.body.email)
+  })
+
+  test('should throw if any dependency throws', async () => {
+    const invalid = {}
+    const authUseCase = makeAuthUseCase()
+    const suts = [
+      new LoginRouter(),
+      new LoginRouter({}),
+      new LoginRouter({
+        authUseCase: invalid
+      }),
+      new LoginRouter({
+        authUseCase
+      }),
+      new LoginRouter({
+        authUseCase,
+        emailValidator: invalid
+      }),
+      new LoginRouter({
+        emailValidator: invalid
+      })
+    ]
+    for (const sut of suts) {
+      const httpRequest = {
+        body: {
+          email: 'loki@gmail.com',
+          password: 'xxx000'
+        }
+      }
+
+      const httpResponse = await sut.route(httpRequest)
+      expect(httpResponse.statusCode).toBe(500)
+    }
   })
 })
