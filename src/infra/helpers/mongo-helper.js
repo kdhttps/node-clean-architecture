@@ -18,6 +18,10 @@ module.exports = {
   },
 
   async getDB () {
+    if (this.connection) {
+      return this.db
+    }
+    await this.connect(this.uri, this.dbName)
     return this.db
   }
 }
