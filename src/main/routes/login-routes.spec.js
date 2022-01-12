@@ -26,7 +26,6 @@ describe('Login Routes', () => {
       name: 'test',
       password: bcrypt.hashSync('hashed_pass', 10)
     }
-
     await userModel.insertOne(user)
 
     await request(app)
