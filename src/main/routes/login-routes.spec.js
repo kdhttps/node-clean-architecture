@@ -1,5 +1,5 @@
-const jwt = require('jsonwebtoken')
 const request = require('supertest')
+const bcrypt = require('bcrypt')
 const MongoHelper = require('../../infra/helpers/mongo-helper')
 const app = require('../config/app')
 
@@ -9,7 +9,6 @@ describe('Login Routes', () => {
   beforeAll(async () => {
     await MongoHelper.connect(global.__MONGO_URI__)
     userModel = await MongoHelper.getCollection('users')
-    jwt.token = 'abc123'
   })
 
   beforeEach(async () => {
@@ -25,7 +24,7 @@ describe('Login Routes', () => {
       _id: 'any_id',
       email: 'valid@test.com',
       name: 'test',
-      password: 'hashed_password'
+      password: bcrypt.hashSync('hashed_pass', 10)
     }
 
     await userModel.insertOne(user)
@@ -34,7 +33,7 @@ describe('Login Routes', () => {
       .post('/api/login')
       .send({
         email: user.email,
-        password: user.password
+        password: 'hashed_pass'
       })
       .expect(200)
   })
