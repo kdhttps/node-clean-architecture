@@ -25,7 +25,7 @@ const makeUserByEmailRepository = () => {
   const loadUserByEmailResository = new LoadUserByEmailResositorySpy()
   loadUserByEmailResository.user = {
     password: 'hashedPassword',
-    userId: 'avengersCaptain'
+    _id: 'avengersCaptain'
   }
 
   return loadUserByEmailResository
@@ -33,15 +33,15 @@ const makeUserByEmailRepository = () => {
 
 const makeUpdateAccessTokenRepository = () => {
   class UpdateAccessTokenRepositorySpy {
-    async update (userId, accessToken) {
-      this.userId = userId
+    async update (_id, accessToken) {
+      this._id = _id
       this.accessToken = accessToken
       return true
     }
   }
 
   const updateAccessTokenRepository = new UpdateAccessTokenRepositorySpy()
-  updateAccessTokenRepository.userId = 'captain@gmail.com'
+  updateAccessTokenRepository._id = 'captain@gmail.com'
   updateAccessTokenRepository.accessToken = 'avengers'
 
   return updateAccessTokenRepository
@@ -49,8 +49,8 @@ const makeUpdateAccessTokenRepository = () => {
 
 const makeTokenGenerator = () => {
   class TokenGeneratorSpy {
-    async generate (userId) {
-      this.userId = userId
+    async generate (_id) {
+      this._id = _id
       return this.accessToken
     }
   }
@@ -81,7 +81,7 @@ const makeUserByEmailRepositoryWithError = () => {
 
 const makeTokenGeneratorError = () => {
   class TokenGeneratorSpy {
-    async generate (userId) {
+    async generate (_id) {
       throw new Error()
     }
   }
@@ -161,10 +161,10 @@ describe('Auth UseCase', () => {
     expect(encrypter.hashedPassword).toBe(loadUserByEmailResository.user.password)
   })
 
-  test('should call TokenGenerator with correct userId', async () => {
+  test('should call TokenGenerator with correct _id', async () => {
     const { sut, loadUserByEmailResository, tokenGenerator } = makeSut()
     await sut.auth('captain@gmail.com', 'password')
-    expect(tokenGenerator.userId).toBe(loadUserByEmailResository.user.userId)
+    expect(tokenGenerator._id).toBe(loadUserByEmailResository.user._id)
   })
 
   test('should return token if correct credentials are provided', async () => {
@@ -177,7 +177,7 @@ describe('Auth UseCase', () => {
   test('should call UpdateAccessTokenRepository with correct values', async () => {
     const { sut, loadUserByEmailResository, tokenGenerator, updateAccessTokenRepository } = makeSut()
     await sut.auth('captain@gmail.com', 'password')
-    expect(updateAccessTokenRepository.userId).toBe(loadUserByEmailResository.user.id)
+    expect(updateAccessTokenRepository._id).toBe(loadUserByEmailResository.user._id)
     expect(updateAccessTokenRepository.accessToken).toBe(tokenGenerator.accessToken)
   })
 
