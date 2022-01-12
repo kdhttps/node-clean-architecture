@@ -5,21 +5,27 @@ module.exports = class HttpResponse {
   static badRequest (error) {
     return {
       statusCode: 400,
-      body: error
+      body: {
+        error: error.message
+      }
     }
   }
 
   static internalServerError () {
     return {
       statusCode: 500,
-      body: new ServerError()
+      body: {
+        error: new ServerError().message
+      }
     }
   }
 
   static unAuthenticatedError () {
     return {
       statusCode: 401,
-      body: new UnauthenticatedError()
+      body: {
+        error: new UnauthenticatedError().message
+      }
     }
   }
 
